@@ -32,7 +32,7 @@ export default async function TransactionsPage() {
     );
   }
 
-  // Serialize Prisma objects to plain types
+  // 1. Serialize transactions
   const serializedTransactions: SerializedTransaction[] = user.transactions.map((tx) => ({
     id: tx.id,
     type: tx.type as "EXPENSE" | "INCOME" | "TRANSFER",
@@ -47,14 +47,17 @@ export default async function TransactionsPage() {
     category: tx.category,
   }));
 
+  // 2. Serialize accounts (explicitly converting initialBalance to number)
   const serializedAccounts = user.accounts.map((a) => ({
     id: a.id,
     name: a.name,
     type: String(a.type),
+    initialBalance: Number(a.initialBalance),
     color: a.color,
     icon: a.icon,
   }));
 
+  // 3. Serialize categories
   const serializedCategories = user.categories.map((c) => ({
     id: c.id,
     name: c.name,
@@ -65,7 +68,6 @@ export default async function TransactionsPage() {
   return (
     <main className="min-h-screen bg-[#FDFBF7] dark:bg-gray-950 pb-28">
       <div className="mx-auto max-w-4xl px-4 pt-6 sm:px-6 lg:px-8 space-y-5">
-        {/* Navigation Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -83,7 +85,6 @@ export default async function TransactionsPage() {
           </span>
         </div>
 
-        {/* Search, Filter & List Manager */}
         <TransactionManager
           initialTransactions={serializedTransactions}
           accounts={serializedAccounts}
@@ -91,7 +92,6 @@ export default async function TransactionsPage() {
         />
       </div>
 
-      {/* Floating Add Action */}
       <AddTransactionModalWrapper
         accounts={serializedAccounts}
         categories={serializedCategories}
