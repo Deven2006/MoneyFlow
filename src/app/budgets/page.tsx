@@ -4,17 +4,27 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import BudgetManager, { CategoryBudgetDetail } from "@/components/budgets/BudgetManager";
 import AddTransactionModalWrapper from "@/components/dashboard/AddTransactionModalWrapper";
+import MonthYearPicker from "@/components/common/MonthYearPicker";
 
 export const dynamic = "force-dynamic";
 
-export default async function BudgetsPage() {
+interface BudgetsPageProps {
+  searchParams: Promise<{ month?: string; year?: string }>;
+}
+
+export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
+  const resolvedParams = await searchParams;
+  const now = new Date();
+  const selectedMonth = resolvedParams.month ? parseInt(resolvedParams.month, 10) : now.getMonth() + 1;
+  const selectedYear = resolvedParams.year ? parseInt(resolvedParams.year, 10) : now.getFullYear();
+
   const user = await prisma.user.findFirst({
     where: { email: "demo@moneyflow.app" },
     include: {
       accounts: { where: { isArchived: false } },
       categories: { where: { isArchived: false } },
       budgets: {
-        where: { month: 8, year: 2026 },
+        where: { month: selectedMonth, year: selectedYear },
         include: { category: true },
       },
     },
@@ -28,9 +38,9 @@ export default async function BudgetsPage() {
     );
   }
 
-  // Calculate actual spending per category for August 2026
-  const monthStart = new Date(2026, 7, 1);
-  const monthEnd = new Date(2026, 8, 0, 23, 59, 59);
+  // Calculate actual spending per category for the selected month
+  const monthStart = new Date(selectedYear, selectedMonth - 1, 1);
+  const monthEnd = new Date(selectedYear, selectedMonth, 0, 23, 59, 59);
 
   const categoryExpenses = await prisma.transaction.groupBy({
     by: ["categoryId"],
@@ -50,7 +60,6 @@ export default async function BudgetsPage() {
     }
   }
 
-  // Build budget details
   const budgetDetails: CategoryBudgetDetail[] = user.categories.map((cat) => {
     const matchedBudget = user.budgets.find((b) => b.categoryId === cat.id);
     return {
@@ -74,6 +83,7 @@ export default async function BudgetsPage() {
     id: a.id,
     name: a.name,
     type: String(a.type),
+    initialBalance: Number(a.initialBalance),
     color: a.color,
     icon: a.icon,
   }));
@@ -81,7 +91,7 @@ export default async function BudgetsPage() {
   return (
     <main className="min-h-screen bg-[#FDFBF7] dark:bg-gray-950 pb-28">
       <div className="mx-auto max-w-4xl px-4 pt-6 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/"
@@ -91,16 +101,18 @@ export default async function BudgetsPage() {
             </Link>
             <div>
               <h1 className="text-xl font-extrabold text-gray-900 dark:text-gray-100">Monthly Budgets</h1>
-              <p className="text-xs font-semibold text-gray-400">August 2026</p>
+              <p className="text-xs font-semibold text-gray-400">Plan & limit spending</p>
             </div>
           </div>
+
+          <MonthYearPicker currentMonth={selectedMonth} currentYear={selectedYear} />
         </div>
 
         <BudgetManager
           categories={serializedCategories}
           budgetDetails={budgetDetails}
-          currentMonth={8}
-          currentYear={2026}
+          currentMonth={selectedMonth}
+          currentYear={selectedYear}
         />
       </div>
 
