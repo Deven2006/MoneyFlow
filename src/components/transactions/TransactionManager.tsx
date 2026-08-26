@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Trash2, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Download, Loader2, FileSpreadsheet, FileCode } from "lucide-react";
+import { Search, Trash2, Edit2, Loader2, FileSpreadsheet, FileCode } from "lucide-react";
 import { deleteTransactionAction } from "@/server/actions/transactions";
 import { AccountItem, CategoryItem } from "@/types";
+import EditTransactionModal from "@/components/transactions/EditTransactionModal";
 
 export interface SerializedTransaction {
   id: string;
@@ -27,17 +28,17 @@ interface TransactionManagerProps {
 }
 
 export default function TransactionManager({
-  initialTransactions,
-  accounts,
-  categories,
+  initialTransactions = [],
+  accounts = [],
+  categories = [],
 }: TransactionManagerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("ALL");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedAccount, setSelectedAccount] = useState<string>("ALL");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingTx, setEditingTx] = useState<SerializedTransaction | null>(null);
 
-  // Filter transactions dynamically
   const filteredTransactions = useMemo(() => {
     return initialTransactions.filter((tx) => {
       const matchesSearch =
@@ -67,8 +68,6 @@ export default function TransactionManager({
     <div className="space-y-4">
       {/* Search, Filters, and Export Bar */}
       <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-3">
-        
-        {/* Top Line: Search Input & Export Action */}
         <div className="flex flex-col sm:flex-row gap-2 items-center justify-between">
           <div className="relative w-full sm:flex-1">
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
@@ -105,9 +104,8 @@ export default function TransactionManager({
           </div>
         </div>
 
-        {/* Filter Dropdowns */}
+        {/* Filters */}
         <div className="grid grid-cols-3 gap-2">
-          {/* Type Filter */}
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
@@ -119,7 +117,6 @@ export default function TransactionManager({
             <option value="TRANSFER">Transfers</option>
           </select>
 
-          {/* Category Filter */}
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -133,7 +130,6 @@ export default function TransactionManager({
             ))}
           </select>
 
-          {/* Account Filter */}
           <select
             value={selectedAccount}
             onChange={(e) => setSelectedAccount(e.target.value)}
@@ -200,23 +196,43 @@ export default function TransactionManager({
                   </p>
                 </div>
 
-                <button
-                  onClick={() => handleDelete(tx.id)}
-                  disabled={deletingId === tx.id}
-                  className="rounded-full p-2 text-gray-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 transition"
-                  title="Delete transaction"
-                >
-                  {deletingId === tx.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setEditingTx(tx)}
+                    className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition"
+                    title="Edit transaction"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(tx.id)}
+                    disabled={deletingId === tx.id}
+                    className="rounded-full p-2 text-gray-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 transition"
+                    title="Delete transaction"
+                  >
+                    {deletingId === tx.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {/* Edit Modal */}
+      {editingTx && (
+        <EditTransactionModal
+          transaction={editingTx}
+          onClose={() => setEditingTx(null)}
+          accounts={accounts}
+          categories={categories}
+        />
+      )}
     </div>
   );
 }
