@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, Landmark, PieChart } from "lucide-react";
+import { LayoutDashboard, Receipt, Landmark, PieChart, BarChart2 } from "lucide-react";
 
 export default function AppNav() {
   const pathname = usePathname();
@@ -13,6 +13,7 @@ export default function AppNav() {
     { href: "/transactions", label: "Transactions", icon: Receipt },
     { href: "/accounts", label: "Accounts", icon: Landmark },
     { href: "/budgets", label: "Budgets", icon: PieChart },
+    { href: "/analytics", label: "Analytics", icon: BarChart2 },
   ];
 
   return (
