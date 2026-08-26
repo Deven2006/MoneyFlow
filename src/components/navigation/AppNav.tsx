@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Receipt, Landmark, PieChart, BarChart2, CalendarClock, Tags } from "lucide-react";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 export default function AppNav() {
   const pathname = usePathname();
@@ -30,25 +31,31 @@ export default function AppNav() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-1">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition ${
-                  isActive
-                    ? "bg-purple-50 text-[#6750A4] dark:bg-purple-950 dark:text-purple-300"
-                    : "text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-1">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition ${
+                    isActive
+                      ? "bg-purple-50 text-[#6750A4] dark:bg-purple-950 dark:text-purple-300"
+                      : "text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="pl-1 border-l border-gray-200 dark:border-gray-800">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </nav>
