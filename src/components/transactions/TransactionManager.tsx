@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Trash2, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Filter, Loader2 } from "lucide-react";
+import { Search, Trash2, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Download, Loader2, FileSpreadsheet, FileCode } from "lucide-react";
 import { deleteTransactionAction } from "@/server/actions/transactions";
 import { AccountItem, CategoryItem } from "@/types";
 
@@ -40,21 +40,15 @@ export default function TransactionManager({
   // Filter transactions dynamically
   const filteredTransactions = useMemo(() => {
     return initialTransactions.filter((tx) => {
-      // 1. Search filter
       const matchesSearch =
         (tx.merchant?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
         (tx.notes?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
         (tx.category?.name.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
         tx.amount.toString().includes(searchTerm);
 
-      // 2. Type filter
       const matchesType = selectedType === "ALL" || tx.type === selectedType;
-
-      // 3. Category filter
       const matchesCategory =
         selectedCategory === "ALL" || tx.categoryId === selectedCategory;
-
-      // 4. Account filter
       const matchesAccount =
         selectedAccount === "ALL" || tx.accountId === selectedAccount;
 
@@ -71,18 +65,44 @@ export default function TransactionManager({
 
   return (
     <div className="space-y-4">
-      {/* Search and Filters Bar */}
+      {/* Search, Filters, and Export Bar */}
       <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-3">
-        {/* Search Input */}
-        <div className="relative">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by merchant, category, amount..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-2xl bg-gray-50 dark:bg-gray-800 py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6750A4]"
-          />
+        
+        {/* Top Line: Search Input & Export Action */}
+        <div className="flex flex-col sm:flex-row gap-2 items-center justify-between">
+          <div className="relative w-full sm:flex-1">
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by merchant, category, amount..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-2xl bg-gray-50 dark:bg-gray-800 py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6750A4]"
+            />
+          </div>
+
+          {/* Export Buttons */}
+          <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
+            <a
+              href="/api/export?format=csv"
+              download
+              className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 transition active:scale-95"
+              title="Download CSV Ledger"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+              <span>Export CSV</span>
+            </a>
+
+            <a
+              href="/api/export?format=json"
+              download
+              className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 transition active:scale-95"
+              title="Download JSON Backup"
+            >
+              <FileCode className="h-3.5 w-3.5 text-purple-600" />
+              <span>JSON</span>
+            </a>
+          </div>
         </div>
 
         {/* Filter Dropdowns */}
@@ -180,7 +200,6 @@ export default function TransactionManager({
                   </p>
                 </div>
 
-                {/* Delete Button */}
                 <button
                   onClick={() => handleDelete(tx.id)}
                   disabled={deletingId === tx.id}
