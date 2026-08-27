@@ -19,13 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-[#FDFBF7] text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100 transition-colors duration-200`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+      <body
+        suppressHydrationWarning
+        className={`${inter.className} bg-[#FDFBF7] text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100 transition-colors duration-200`}
+      >
+        <ThemeProvider>
           <AppNav />
           {children}
         </ThemeProvider>
